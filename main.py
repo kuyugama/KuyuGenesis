@@ -10,7 +10,6 @@ from core import MainAddon
 from core import exceptions, Account, AccountManager
 from core.addons_loader import load_main_addon, system, load_addons
 from core import addons_loader
-from core.database.init import init_engine
 from core.logs import get_logger, wrap_into_color
 
 import config
@@ -38,8 +37,6 @@ async def main():
     account_manager = AccountManager()
 
     addons_loader.system.set_main_addon(MainAddon.this_addon)
-
-    await init_engine()
 
     command_manager = CommandManager(CommandManager.NO_ADDON, True)
 
