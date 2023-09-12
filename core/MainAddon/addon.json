@@ -1,0 +1,9 @@
+{
+    "name": "MAIN ADDON",
+    "description": "The main addon of this userbot",
+    "version": "1.0",
+    "author": "KuyuGama",
+    "status": "enabled",
+    "__status_comment": "This addon can't be disabled.",
+    "requirements": []
+}
