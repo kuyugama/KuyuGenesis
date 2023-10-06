@@ -85,13 +85,13 @@ class Paginator:
         pages = make_pages(elements, per_page)
 
         if self._edit:
-            sent = self._account.client.edit_message_text(
+            sent = await self._account.client.edit_message_text(
                 chat_id=self._chat_id,
                 message_id=self._message_id,
                 text=self._page_text(pages, 1),
             )
         else:
-            sent = self._account.client.send_message(
+            sent = await self._account.client.send_message(
                 chat_id=self._chat_id,
                 reply_to_message_id=self._message_id,
                 text=self._page_text(pages, 1),
