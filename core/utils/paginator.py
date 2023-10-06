@@ -1,4 +1,3 @@
-import logging
 import math
 from typing import Any
 
@@ -23,23 +22,27 @@ class Paginator:
     _account: Account | None = None
 
     def __init__(self, event_manager: EventManager):
-        self._event_manager = EventManager(enabled=True, log_level=logging.WARNING)
+        self._event_manager = EventManager(enabled=True)
         self._paginators: dict[int, dict[str, Any]] = {}
         self._paginators_messages: dict[int, int] = {}
         self._last_paginator_id = -1
 
         self._event_manager.register_message_handler(
-            self.pager_handler, F.message.text.in_(["<", ">"]) & F.message.reply_to_message.is_not(None), by_me=True
+            self.pager_handler, F.message.text.in_(["<", ">"]) & F.message.reply_to_message.is_not(None)
         )
         event_manager.include_manager(self._event_manager)
 
         self._parent_event_manager = event_manager
 
+        # Values defined in init() function
+        self._ready = False
         self._chat_id = None
         self._message_id = None
         self._edit = None
         self._account = None
+        self._allow_to_use_by_others = None
 
+        # Customization values
         self.footer = "{previous_page} [{page}] {next_page}"
         self.previous_page = "<{page}"
         self.next_page = "{page}>"
@@ -72,15 +75,19 @@ class Paginator:
             ).strip()
         )
 
-    def init(self, message: Message, account: Account, edit: bool = False):
+    def init(self, message: Message, account: Account, edit: bool = False, allow_to_use_by_others: bool = False):
+        self._ready = True
         self._chat_id = message.chat.id
         self._message_id = message.id
         self._account = account
         self._edit = edit
+        self._allow_to_use_by_others = allow_to_use_by_others
 
         return self
 
     async def make(self, elements: list[str], per_page: int = ...):
+        if not self._ready:
+            raise ReferenceError("Paginator not ready to making pages. Use Paginator.init first")
         paginator_id = self.paginator_id
         pages = make_pages(elements, per_page)
 
@@ -102,6 +109,7 @@ class Paginator:
             "current_page": 1,
             "message_id": sent.id,
             "chat_id": self._chat_id,
+            "allow_to_use_by_others": self._allow_to_use_by_others,
             "account_id": self._account.info.id,
         }
         self._paginators_messages[sent.id] = paginator_id
@@ -115,6 +123,9 @@ class Paginator:
         paginator = self._paginators[
             self._paginators_messages[event.message.reply_to_message.id]
         ]
+
+        if not paginator["allow_to_use_by_others"] and not event.message.outgoing:
+            return event.skip()
 
         if (
             increase_page_number
@@ -132,3 +143,5 @@ class Paginator:
             message_id=paginator["message_id"],
             text=self._page_text(paginator["pages"], paginator["current_page"])
         )
+
+        await event.message.delete()
