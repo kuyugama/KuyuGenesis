@@ -19,9 +19,9 @@ class Account:
         return self._info
 
     @property
-    async def info(self):
+    def info(self):
         if not self._info:
-            await self.resolve_info()
+            raise ReferenceError("Info is not resolved yet. Please use Account.resolve_info() first")
         return self._info
 
     @property

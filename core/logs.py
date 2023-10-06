@@ -48,7 +48,7 @@ def stream_handler(level: int):
     return handler
 
 
-def get_logger(logger_name: str, log_level=WARNING):
+def get_logger(logger_name: str, log_level=WARNING) -> logging.Logger:
     logger_name = (
         f"{LOGGER_NAME_COLOR}KuyuGenesis{Style.RESET_ALL}"
         f"|{LOGGER_NAME_COLOR}{name}{Style.RESET_ALL}"

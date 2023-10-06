@@ -1,6 +1,6 @@
 import inspect
 
-from .messages import get_difference
+from .paginator import Paginator
 
 
 def params_generator(scope, variables, ignore_types=False):

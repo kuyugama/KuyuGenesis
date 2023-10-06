@@ -61,7 +61,7 @@ async def get_loaded_accounts(client, message):
     accounts = []
 
     async def get_account_info(account, channel: list):
-        channel.append("account " + (await account.info).username)
+        channel.append("account " + account.info.username)
 
     await client.account.manager.async_foreach(get_account_info, accounts)
 
@@ -76,9 +76,8 @@ async def info(client: ExtendedClient, message: types.Message):
     accounts = []
 
     async def get_account_info(account: Account, channel: list):
-        account_info = await account.info
-        full_name = account_info.first_name + (" " + account_info.last_name if account_info.last_name else "")
-        channel.append(f"{full_name}(@{account_info.username}:{account_info.id})")
+        full_name = account.info.first_name + (" " + account.info.last_name if account.info.last_name else "")
+        channel.append(f"{full_name}(@{account.info.username}:{account.info.id})")
 
     await client.account.manager.async_foreach(get_account_info, accounts)
 
