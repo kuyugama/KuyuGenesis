@@ -3,6 +3,7 @@ from typing import Any
 
 from kgemng import EventManager, NewMessageEvent
 from magic_filter import F
+from pyrogram import errors
 from pyrogram.types import Message
 
 from core import Account
@@ -43,6 +44,7 @@ class Paginator:
         self._allow_to_use_by_others = None
 
         # Customization values
+        self.header = ""
         self.footer = "{previous_page} [{page}] {next_page}"
         self.previous_page = "<{page}"
         self.next_page = "{page}>"
@@ -57,7 +59,8 @@ class Paginator:
 
     def _page_text(self, pages: list[str], page):
         return (
-            self.page_element_separator.join(
+            self.header + "\n\n"
+            + self.page_element_separator.join(
                 "{0}{1}{2}".format(
                     self.page_element_prefix, element, self.page_element_suffix
                 )
@@ -144,4 +147,7 @@ class Paginator:
             text=self._page_text(paginator["pages"], paginator["current_page"])
         )
 
-        await event.message.delete()
+        try:
+            await event.message.delete()
+        except errors.MessageDeleteForbidden:
+            pass
