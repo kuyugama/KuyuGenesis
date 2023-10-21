@@ -13,6 +13,7 @@ from core import addons_loader
 from core.account_manager import ExtendedClient, Account
 
 import config
+from core.utils import Paginator
 
 
 def get_command_manager():
@@ -105,7 +106,7 @@ async def info(client: ExtendedClient, message: types.Message):
 
 
 @command_manager.on_command("commands", description="Shows addon registered commands")
-async def get_commands(_: ExtendedClient, message: types.Message):
+async def get_commands(client: ExtendedClient, message: types.Message):
 
     # noinspection PyUnresolvedReferences
     arguments = message.arguments
@@ -116,7 +117,11 @@ async def get_commands(_: ExtendedClient, message: types.Message):
         )
 
     try:
-        addon_command_manager = addons_loader.system.get_addon_command_manager(message.text.split(maxsplit=1)[1])
+        addon_name = message.text.split(maxsplit=1)[1]
+        if addon_name == "MAIN ADDON":
+            addon_command_manager = command_manager
+        else:
+            addon_command_manager = addons_loader.system.get_addon_command_manager(addon_name)
     except ValueError:
         return await message.edit(
             message.text + "\n\nAddon not found"
@@ -136,18 +141,24 @@ async def get_commands(_: ExtendedClient, message: types.Message):
             f"    <b>Is enabled</b>: {command.enabled}"
         )
 
-    def describe_manager(manager: CommandManager) -> str:
-        return (
-            f"From <b>{manager.addon.meta.name if manager.addon != manager.NO_ADDON else 'Built-in'}</b>:\n"
-            + "\n\n".join(
-                "    " + describe_command(command).replace("\n", "\n    ")
-                for command in manager.get_registered_commands()
-            )
+    paginator = Paginator(event_manager)
+    paginator.header = (
+        f"Commands from <b> "
+        + (
+            addon_command_manager.addon.meta.name
+            if addon_command_manager.addon != addon_command_manager.NO_ADDON
+            else 'Built-in'
         )
+        + "</b>:"
+    )
+    paginator.page_element_prefix = "    "
 
-    await message.edit_text(
-        "All commands:\n"
-        + describe_manager(addon_command_manager)
+    await paginator.init(message, client.account, True).make(
+        [
+            describe_command(command).replace("\n", "\n     ")
+            for command in addon_command_manager.get_registered_commands()
+        ],
+        3
     )
 
 
@@ -156,7 +167,7 @@ async def get_commands(_: ExtendedClient, message: types.Message):
     description="Shows available addons",
     arguments=("addon status(loaded|enabled|disabled|all)",)
 )
-async def get_addons(_: ExtendedClient, message: types.Message):
+async def get_addons(client: ExtendedClient, message: types.Message):
 
     # noinspection PyUnresolvedReferences
     arguments = message.arguments
@@ -192,10 +203,17 @@ async def get_addons(_: ExtendedClient, message: types.Message):
     def addon_status(addon):
         return "🟢" if addon.meta.status == "enabled" else "🔴"
 
-    text += "\n\n".join(
-        f"{addon_status(addon)}{addon.meta.name} v{addon.meta.version} by {addon.meta.author}\n"
-        f"Details: <code>.addon {addon.meta.name}</code>"
-        for addon in addons
+    paginator = Paginator(event_manager)
+    paginator.header = f"{status.capitalize()} addons:"
+    paginator.page_element_prefix = "- "
+
+    paginator.init(message, client.account).make(
+        [
+            f"{addon_status(addon)}{addon.meta.name} v{addon.meta.version} by {addon.meta.author}\n"
+            f"  Details: <code>.addon {addon.meta.name}</code>"
+            for addon in addons
+        ],
+        5
     )
 
     await message.edit(text)
