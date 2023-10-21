@@ -207,7 +207,7 @@ async def get_addons(client: ExtendedClient, message: types.Message):
     paginator.header = f"{status.capitalize()} addons:"
     paginator.page_element_prefix = "- "
 
-    paginator.init(message, client.account).make(
+    await paginator.init(message, client.account).make(
         [
             f"{addon_status(addon)}{addon.meta.name} v{addon.meta.version} by {addon.meta.author}\n"
             f"  Details: <code>.addon {addon.meta.name}</code>"
@@ -215,8 +215,6 @@ async def get_addons(client: ExtendedClient, message: types.Message):
         ],
         5
     )
-
-    await message.edit(text)
 
 
 def describe_addon(addon: Addon) -> str:

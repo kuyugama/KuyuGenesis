@@ -10,7 +10,7 @@ proxy = parser["Main"]
 accounts_count = proxy.getint("accounts_count")
 sessions_root = Path(proxy.get("sessions_root"))
 
-version = "1.1.4"
+version = "1.1.5"
 name = proxy.get("name")
 
 api_id = proxy.get("api_id")
