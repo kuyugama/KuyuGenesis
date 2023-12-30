@@ -1,3 +1,4 @@
+import builtins
 import logging
 from pathlib import Path
 
@@ -43,7 +44,7 @@ def load_addons(
         addon = system.get_addon_by_name(addon_name)
 
         if not addon:
-            logger.warn(
+            logger.warning(
                 "Addon [ {addon_name} ] not found".format(
                     addon_name=wrap_into_color(addon_name, color=Fore.YELLOW)
                 )
@@ -51,12 +52,16 @@ def load_addons(
             continue
 
         if addon.meta.status == "disabled":
-            logger.warn(
+            logger.warning(
                 "Cannot load disabled addons [ {addon_name} ]".format(
                     addon_name=wrap_into_color(addon_name, color=Fore.YELLOW)
                 )
             )
             continue
+
+        setattr(builtins, "this", addon)
+        addon.module.this = addon
+        delattr(builtins, "this")
 
         try:
             system.get_addon_system_event_handler(addon, "load")()
@@ -77,7 +82,7 @@ def unload_addons(*addons_names: str | Addon):
         addon = system.get_addon_by_name(addon_name)
 
         if not addon:
-            logger.warn(
+            logger.warning(
                 "Addon [ {addon_name} ] not found".format(
                     addon_name=wrap_into_color(addon_name, color=Fore.YELLOW)
                 )
@@ -85,7 +90,7 @@ def unload_addons(*addons_names: str | Addon):
             continue
 
         if addon.meta.status == "disabled":
-            logger.warn(
+            logger.warning(
                 "Cannot unload disabled addon [ {addon_name} ]".format(
                     addon_name=wrap_into_color(addon_name, color=Fore.YELLOW)
                 )
@@ -116,7 +121,7 @@ def include_events(*addons_names: str | Addon):
         for name in addons_names:
             addon = system.get_addon_by_name(name)
             if not addon:
-                logger.warn(
+                logger.warning(
                     "Addon [ {addon_name} ] not found".format(
                         addon_name=wrap_into_color(name, color=Fore.YELLOW)
                     )
@@ -124,7 +129,7 @@ def include_events(*addons_names: str | Addon):
                 continue
 
             if addon.meta.status == "disabled":
-                logger.warn(
+                logger.warning(
                     "Cannot include event manager from disabled addons [ {addon_name} ]".format(
                         addon_name=wrap_into_color(name, color=Fore.YELLOW)
                     )
@@ -141,7 +146,7 @@ def include_events(*addons_names: str | Addon):
             event_manager = system.get_addon_event_manager(addon)
             event_manager.enable()
         except Exception as e:
-            logger.warn(
+            logger.warning(
                 "Error while including event manager from addon [ {addon_name} ] -> ".format(
                     addon_name=wrap_into_color(addon.meta.name, color=Fore.YELLOW)
                 )
@@ -166,7 +171,7 @@ def exclude_events(*addons_names: str | Addon):
         for name in addons_names:
             addon = system.get_addon_by_name(name)
             if not addon:
-                logger.warn(
+                logger.warning(
                     "Addon [ {addon_name} ] not found".format(
                         addon_name=wrap_into_color(name, color=Fore.YELLOW)
                     )
@@ -174,7 +179,7 @@ def exclude_events(*addons_names: str | Addon):
                 continue
 
             if addon.meta.status == "disabled":
-                logger.warn(
+                logger.warning(
                     "Cannot exclude event manager from disabled addons [ {addon_name} ]".format(
                         addon_name=wrap_into_color(name, color=Fore.YELLOW)
                     )
@@ -192,7 +197,7 @@ def exclude_events(*addons_names: str | Addon):
             event_manager = system.get_addon_event_manager(addon)
             event_manager.disable()
         except Exception as e:
-            logger.warn(
+            logger.warning(
                 "Error while including event manager from addon [ {addon_name} ] -> ".format(
                     addon_name=wrap_into_color(addon.meta.name, color=Fore.YELLOW)
                 )
@@ -217,7 +222,7 @@ def include_commands(*addons_names: str | Addon):
         for name in addons_names:
             addon = system.get_addon_by_name(name)
             if not addon:
-                logger.warn(
+                logger.warning(
                     "Addon [ {addon_name} ] not found".format(
                         addon_name=wrap_into_color(name, color=Fore.YELLOW)
                     )
@@ -225,7 +230,7 @@ def include_commands(*addons_names: str | Addon):
                 continue
 
             if addon.meta.status == "disabled":
-                logger.warn(
+                logger.warning(
                     "Cannot include command managers from disabled addons [ {addon_name} ]".format(
                         addon_name=wrap_into_color(name, color=Fore.YELLOW)
                     )
@@ -242,7 +247,7 @@ def include_commands(*addons_names: str | Addon):
             addon_command_manager = system.get_addon_command_manager(addon)
             addon_command_manager.enable()
         except Exception as e:
-            logger.warn(
+            logger.warning(
                 "Error while including command managers from addon [ {addon_name} ] -> ".format(
                     addon_name=wrap_into_color(addon.meta.name, color=Fore.YELLOW)
                 )
@@ -267,7 +272,7 @@ def exclude_commands(*addons_names: str | Addon):
         for name in addons_names:
             addon = system.get_addon_by_name(name)
             if not addon:
-                logger.warn(
+                logger.warning(
                     "Addon [ {addon_name} ] not found".format(
                         addon_name=wrap_into_color(name, color=Fore.YELLOW)
                     )
@@ -275,7 +280,7 @@ def exclude_commands(*addons_names: str | Addon):
                 continue
 
             if addon.meta.status == "disabled":
-                logger.warn(
+                logger.warning(
                     "Cannot exclude command managers from disabled addons [ {addon_name} ]".format(
                         addon_name=wrap_into_color(name, color=Fore.YELLOW)
                     )
@@ -293,7 +298,7 @@ def exclude_commands(*addons_names: str | Addon):
             addon_command_manager = system.get_addon_command_manager(addon)
             addon_command_manager.disable()
         except Exception as e:
-            logger.warn(
+            logger.warning(
                 "Error while excluding command manager from addon [ {addon_name} ] -> ".format(
                     addon_name=wrap_into_color(addon.meta.name, color=Fore.YELLOW)
                 )

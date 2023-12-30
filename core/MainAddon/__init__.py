@@ -89,7 +89,7 @@ async def info(client: ExtendedClient, message: types.Message):
     )[:5]
 
     top_used_commands_text = ', '.join(
-        f"{record['command'].body}({record['call_count']})" for record in top_used_commands
+        f"[{' | '.join(record['command'].body)} : {record['call_count']}]" for record in top_used_commands
     )
 
     await message.edit(
@@ -198,8 +198,6 @@ async def get_addons(client: ExtendedClient, message: types.Message):
 
     addons.sort(key=lambda addon: (addon.meta.author, addon.meta.name))
 
-    text = f"{status.capitalize()} addons:\n"
-
     def addon_status(addon):
         return "🟢" if addon.meta.status == "enabled" else "🔴"
 
@@ -207,7 +205,7 @@ async def get_addons(client: ExtendedClient, message: types.Message):
     paginator.header = f"{status.capitalize()} addons:"
     paginator.page_element_prefix = "- "
 
-    await paginator.init(message, client.account).make(
+    await paginator.init(message, client.account, True).make(
         [
             f"{addon_status(addon)}{addon.meta.name} v{addon.meta.version} by {addon.meta.author}\n"
             f"  Details: <code>.addon {addon.meta.name}</code>"
